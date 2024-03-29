@@ -335,14 +335,17 @@ class modified_VelocytoLoom():
             # Pick random neighbours and prune the rest
             neigh_ixs = self.embedding_knn.indices.reshape((-1, n_neighbors + 1))
             p = np.linspace(sampling_probs[0], sampling_probs[1], neigh_ixs.shape[1])
-            p = p / p.sum()
 
             # There was a problem of API consistency because the random.choice can pick the diagonal value (or not)
             # resulting self.corrcoeff with different number of nonzero entry per row.
             # Not updated yet not to break previous analyses
             # Fix is substituting below `neigh_ixs.shape[1]` with `np.arange(1,neigh_ixs.shape[1]-1)`
             # I change it here since I am doing some breaking changes
-            sampling_ixs = np.stack([np.random.choice(neigh_ixs.shape[1],
+            a = np.arange(1,neigh_ixs.shape[1]-1)
+            p = p[1:-1]
+            p = p / p.sum()
+            
+            sampling_ixs = np.stack([np.random.choice(a,
                                                       size=(int(sampled_fraction * (n_neighbors + 1)),),
                                                       replace=False,
                                                       p=p) for i in range(neigh_ixs.shape[0])], 0)
